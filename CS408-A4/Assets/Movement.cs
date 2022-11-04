@@ -107,6 +107,12 @@ public class Movement : MonoBehaviour
                         animator.SetBool("isDancing", true);
                         break;
                     }
+                case 'h'://breathing
+                    {
+                        resetBools();
+                        animator.SetBool("isBreathing", true);
+                        break;
+                    }
             }
         }
 
@@ -116,6 +122,6 @@ public class Movement : MonoBehaviour
         animator.SetBool("isDancing", false);
         animator.SetBool("isPose1", false);
         animator.SetBool("isPose2", false);
-        //animator.SetBool("isIdle", false);
+        animator.SetBool("isBreathing", false);
     }
 }

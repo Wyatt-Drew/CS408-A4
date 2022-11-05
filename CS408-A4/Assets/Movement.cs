@@ -15,10 +15,17 @@ public class Movement : MonoBehaviour
     private float originalStepOffset;
     private float lastGroundTime;
     private float jumpButtonPressedTime;
+    private bool isJumping;
+    private bool isFalling;
+
+    //GameObject m_MainCamera;
+    Camera m_MainCamera;
 
     // Start is called before the first frame update
     void Start()
     {
+        //m_MainCamera = Camera.main.transform.parent.gameObject;
+        m_MainCamera = Camera.main;
         animator = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
         originalStepOffset = characterController.stepOffset;
@@ -39,6 +46,10 @@ public class Movement : MonoBehaviour
         if (characterController.isGrounded)
         {
             lastGroundTime = Time.time;
+            animator.SetBool("isJumping", false);
+            animator.SetBool("isFalling", false);
+            isFalling = false;
+            isJumping = false;
         }
 
         if (Input.GetButtonDown("Jump"))
@@ -46,13 +57,15 @@ public class Movement : MonoBehaviour
             jumpButtonPressedTime = Time.time;
         }
 
-        if (Time.time - lastGroundTime <= jumpButtonGracePeriod)
+        if (Time.time - lastGroundTime <= jumpButtonGracePeriod) //Checks if grounded recently
         {
             characterController.stepOffset = originalStepOffset;
             ySpeed = -0.5f;
 
-            if (Time.time - jumpButtonPressedTime <= jumpButtonGracePeriod)
+            if (Time.time - jumpButtonPressedTime <= jumpButtonGracePeriod) //Checks if 
             {
+                animator.SetBool("isJumping", true);
+                isJumping = true;
                 ySpeed = jumpSpeed;
                 jumpButtonPressedTime = 0f;
                 lastGroundTime = 0f;
@@ -61,9 +74,18 @@ public class Movement : MonoBehaviour
         else
         {
             characterController.stepOffset = 0;
+            if ((isJumping && ySpeed < 0) || ySpeed < 2)
+            {
+                animator.SetBool("isFalling", true);
+                isFalling = true;
+            }
         }
+        //adjust the movement direction to the angle of the camera.
+        moveDirection = Quaternion.Euler(0, m_MainCamera.transform.localEulerAngles.y, 0) * moveDirection;
 
         Vector3 velocity = moveDirection * magnitude;
+        //move the camera with character
+        m_MainCamera.transform.position += (velocity * Time.deltaTime);
         velocity.y = ySpeed;
 
         characterController.Move(velocity * Time.deltaTime);
@@ -89,6 +111,25 @@ public class Movement : MonoBehaviour
         {
             switch (c)
             {
+                case 'e'://rotate camera right
+                    {
+                        m_MainCamera.transform.RotateAround(transform.position, Vector3.up, -1000 * Time.deltaTime);
+                        break;
+                    }
+                case 'q'://rotate camera left
+                    {
+                        m_MainCamera.transform.RotateAround(transform.position, Vector3.up, 1000 * Time.deltaTime);
+                        break;
+                    }
+                case 'r'://rotate camera behind
+                    {
+                        Vector3 temp = transform.localEulerAngles;
+                        Vector3 peteAngle = new Vector3(0, temp.y, 0);
+                        temp = m_MainCamera.transform.localEulerAngles;
+                        Vector3 cameraAngle = new Vector3(0, temp.y, 0);
+                        m_MainCamera.transform.RotateAround(transform.position, Vector3.up, peteAngle.y-cameraAngle.y);
+                        break;
+                    }
                 case 'f'://t pose to pose 1
                     {
                         resetBools();
@@ -113,6 +154,7 @@ public class Movement : MonoBehaviour
                         animator.SetBool("isBreathing", true);
                         break;
                     }
+
             }
         }
 

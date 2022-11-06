@@ -16,7 +16,6 @@ public class Movement : MonoBehaviour
     private float lastGroundTime;
     private float jumpButtonPressedTime;
     private bool isJumping;
-    private bool isFalling;
 
     //GameObject m_MainCamera;
     Camera m_MainCamera;
@@ -48,7 +47,6 @@ public class Movement : MonoBehaviour
             lastGroundTime = Time.time;
             animator.SetBool("isJumping", false);
             animator.SetBool("isFalling", false);
-            isFalling = false;
             isJumping = false;
         }
 
@@ -77,7 +75,6 @@ public class Movement : MonoBehaviour
             if ((isJumping && ySpeed < 0) || ySpeed < 2)
             {
                 animator.SetBool("isFalling", true);
-                isFalling = true;
             }
         }
         //adjust the movement direction to the angle of the camera.
@@ -87,6 +84,7 @@ public class Movement : MonoBehaviour
         //move the camera with character
         m_MainCamera.transform.position += (velocity * Time.deltaTime);
         velocity.y = ySpeed;
+        
 
         characterController.Move(velocity * Time.deltaTime);
 
@@ -101,9 +99,23 @@ public class Movement : MonoBehaviour
         else
         {
             animator.SetBool("isMoving", false);
-            getInput();
         }
-        
+        float deltaHeight = transform.position.y - m_MainCamera.transform.position.y + 1.5f;
+        m_MainCamera.transform.position += new Vector3(0, deltaHeight * Time.deltaTime * 10f, 0);
+        if (Input.mouseScrollDelta.y != 0f)
+        {
+            m_MainCamera.transform.position = Vector3.MoveTowards(m_MainCamera.transform.position, transform.position, Input.mouseScrollDelta.y * Time.deltaTime * 100f);
+        }
+
+        //if (m_MainCamera.transform.position.y > transform.position.y + 1.5)
+        //{
+        //    m_MainCamera.transform.position += new Vector3(0,-1f * Time.deltaTime, 0);
+        //}
+        //if (m_MainCamera.transform.position.y < transform.position.y + 1.5)
+        //{
+        //    m_MainCamera.transform.position += new Vector3(0, 1f * Time.deltaTime, 0);
+        //}
+        getInput();
     }
     void getInput()
     {
@@ -113,12 +125,12 @@ public class Movement : MonoBehaviour
             {
                 case 'e'://rotate camera right
                     {
-                        m_MainCamera.transform.RotateAround(transform.position, Vector3.up, -1000 * Time.deltaTime);
+                        m_MainCamera.transform.RotateAround(transform.position, Vector3.up, -7000 * Time.deltaTime);
                         break;
                     }
                 case 'q'://rotate camera left
                     {
-                        m_MainCamera.transform.RotateAround(transform.position, Vector3.up, 1000 * Time.deltaTime);
+                        m_MainCamera.transform.RotateAround(transform.position, Vector3.up, 7000 * Time.deltaTime);
                         break;
                     }
                 case 'r'://rotate camera behind

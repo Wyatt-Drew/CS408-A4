@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class Movement : MonoBehaviour
 {
@@ -16,15 +17,20 @@ public class Movement : MonoBehaviour
     private float lastGroundTime;
     private float jumpButtonPressedTime;
     private bool isJumping;
+    private bool isSwimming = false;
+    private float gravity = 3f;
 
+    [SerializeField]
+    GameObject water;
     //GameObject m_MainCamera;
-    Camera m_MainCamera;
+    [SerializeField]
+    CinemachineVirtualCamera m_MainCamera;
+    //Camera m_MainCamera;
 
     // Start is called before the first frame update
     void Start()
     {
-        //m_MainCamera = Camera.main.transform.parent.gameObject;
-        m_MainCamera = Camera.main;
+        //m_MainCamera = Camera.main;
         animator = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
         originalStepOffset = characterController.stepOffset;
@@ -40,28 +46,50 @@ public class Movement : MonoBehaviour
         Vector3 moveDirection = new Vector3(leftRight, 0, upDown);
         float magnitude = Mathf.Clamp01(moveDirection.magnitude) * speed;
         moveDirection.Normalize();
-        ySpeed += Physics.gravity.y * Time.deltaTime;
+        ySpeed += Physics.gravity.y * Time.deltaTime * gravity;
 
+        if (transform.position.y + 1.1f < water.transform.position.y)
+        {
+            animator.SetBool("isSwimming", true);
+            //transform.position += (new Vector3(0, transform.position.y + 1.1f - water.transform.position.y, 0) * Time.deltaTime);
+            isSwimming = true;
+        }
+        else
+        {
+            animator.SetBool("isSwimming", false);
+            isSwimming = false;
+        }
+        if (isSwimming)
+        {
+            if (Input.GetButtonDown("Jump"))
+            {
+                ySpeed = 2f;
+            }else if (!Input.GetKeyDown(KeyCode.LeftControl))
+            {
+                ySpeed = 0f;
+            }
+        }
         if (characterController.isGrounded)
         {
             lastGroundTime = Time.time;
             animator.SetBool("isJumping", false);
             animator.SetBool("isFalling", false);
             isJumping = false;
+            //ySpeed = -0.5f;
         }
 
-        if (Input.GetButtonDown("Jump"))
-        {
-            jumpButtonPressedTime = Time.time;
-        }
+        //if (Input.GetButtonDown("Jump"))
+        //{
+         //   jumpButtonPressedTime = Time.time;
+        //}
 
         if (Time.time - lastGroundTime <= jumpButtonGracePeriod) //Checks if grounded recently
         {
             characterController.stepOffset = originalStepOffset;
-            ySpeed = -0.5f;
-
-            if (Time.time - jumpButtonPressedTime <= jumpButtonGracePeriod) //Checks if 
+            //ySpeed = -0.5f;
+            if (Input.GetButtonDown("Jump"))
             {
+               jumpButtonPressedTime = Time.time;
                 animator.SetBool("isJumping", true);
                 isJumping = true;
                 ySpeed = jumpSpeed;
@@ -83,8 +111,10 @@ public class Movement : MonoBehaviour
         Vector3 velocity = moveDirection * magnitude;
         //move the camera with character
         m_MainCamera.transform.position += (velocity * Time.deltaTime);
-        velocity.y = ySpeed;
-        
+        if (isSwimming != true)
+        {
+            velocity.y = ySpeed;
+        }
 
         characterController.Move(velocity * Time.deltaTime);
 
@@ -100,11 +130,19 @@ public class Movement : MonoBehaviour
         {
             animator.SetBool("isMoving", false);
         }
-        float deltaHeight = transform.position.y - m_MainCamera.transform.position.y + 1.5f;
-        m_MainCamera.transform.position += new Vector3(0, deltaHeight * Time.deltaTime * 10f, 0);
+        //float deltaHeight = transform.position.y - m_MainCamera.transform.position.y + 1.5f;
+        //m_MainCamera.transform.position += new Vector3(0, deltaHeight * Time.deltaTime * 10f, 0);
+        
+    
+
         if (Input.mouseScrollDelta.y != 0f)
         {
-            m_MainCamera.transform.position = Vector3.MoveTowards(m_MainCamera.transform.position, transform.position, Input.mouseScrollDelta.y * Time.deltaTime * 100f);
+            CinemachineComponentBase componentBase = m_MainCamera.GetCinemachineComponent(CinemachineCore.Stage.Body);
+            if (componentBase is CinemachineFramingTransposer)
+            {
+                (componentBase as CinemachineFramingTransposer).m_CameraDistance = (componentBase as CinemachineFramingTransposer).m_CameraDistance + Input.mouseScrollDelta.y * Time.deltaTime * 100f; // your value
+            }
+            //m_MainCamera.transform.position = Vector3.MoveTowards(m_MainCamera.transform.position, transform.position, Input.mouseScrollDelta.y * Time.deltaTime * 100f);
         }
 
         //if (m_MainCamera.transform.position.y > transform.position.y + 1.5)
@@ -116,6 +154,7 @@ public class Movement : MonoBehaviour
         //    m_MainCamera.transform.position += new Vector3(0, 1f * Time.deltaTime, 0);
         //}
         getInput();
+
     }
     void getInput()
     {

@@ -10,9 +10,20 @@ public class disableCanvas : MonoBehaviour
     {
         if (Input.inputString != "")
         {
-            //GetComponent<Canvas>().SetActive(false);
-            Destroy(GameObject.Find("Canvas"));
-            //Destroy(this);
+            GameObject.Find("Canvas").GetComponent<Canvas>().enabled = false;
+            //Destroy(GameObject.Find("Canvas"));
         }
+        foreach (char c in Input.inputString.ToLower())
+        {
+            switch (c)
+            {
+                case 'i'://instructions
+                    {
+                        GameObject.Find("Canvas").GetComponent<Canvas>().enabled = true;
+                        break;
+                    }
+            }
+        }
+
     }
 }

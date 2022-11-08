@@ -179,7 +179,7 @@ public class Movement : MonoBehaviour
     }
     void getInput()
     {
-        foreach (char c in Input.inputString)
+        foreach (char c in Input.inputString.ToLower())
         {
             switch (c)
             {
@@ -214,36 +214,37 @@ public class Movement : MonoBehaviour
                         animator.SetBool("isPose2", true);
                         break;
                     }
-                case 'g'://breathing
-                    {
-                        resetBools();
-                        animator.SetBool("isBreathing", true);
-                        break;
-                    }
-                case 'h'://dancing
-                    {
-                        resetBools();
-                        animator.SetBool("isDancing", true);
-                        break;
-                    }
-                case 'j'://Flair
-                    {
-                        resetBools();
-                        animator.SetBool("isFlair", true);
-                        break;
-                    }
-                case 'k'://Shuffle
-                    {
-                        resetBools();
-                        animator.SetBool("isShuffle", true);
-                        break;
-                    }
-                case 'l'://Range of Movement
+                case 'g'://Range of Movement
                     {
                         resetBools();
                         animator.SetBool("isStretching", true);
                         break;
                     }
+                case 'h'://breathing
+                    {
+                        resetBools();
+                        animator.SetBool("isBreathing", true);
+                        break;
+                    }
+                case 'j'://dancing
+                    {
+                        resetBools();
+                        animator.SetBool("isDancing", true);
+                        break;
+                    }
+                case 'k'://Flair
+                    {
+                        resetBools();
+                        animator.SetBool("isFlair", true);
+                        break;
+                    }
+                case 'l'://Shuffle
+                    {
+                        resetBools();
+                        animator.SetBool("isShuffle", true);
+                        break;
+                    }
+
             }
         }
 

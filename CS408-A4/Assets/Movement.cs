@@ -18,6 +18,7 @@ public class Movement : MonoBehaviour
     private float jumpButtonPressedTime;
     private bool isJumping;
     private bool isSwimming = false;
+    private bool isDiving = false;
     private float gravity = 3f;
 
     [SerializeField]
@@ -41,8 +42,8 @@ public class Movement : MonoBehaviour
     void Update()
     {
 
-        float leftRight = Input.GetAxis("Horizontal");
-        float upDown = Input.GetAxis("Vertical");
+        float leftRight = -Input.GetAxis("Horizontal");
+        float upDown = -Input.GetAxis("Vertical");
         Vector3 moveDirection = new Vector3(leftRight, 0, upDown);
         float magnitude = Mathf.Clamp01(moveDirection.magnitude) * speed;
         moveDirection.Normalize();
@@ -59,14 +60,33 @@ public class Movement : MonoBehaviour
             animator.SetBool("isSwimming", false);
             isSwimming = false;
         }
+        //if (false)
         if (isSwimming)
         {
-            if (Input.GetButtonDown("Jump"))
+            ySpeed = 0f;
+            if (Input.inputString != "")
             {
-                ySpeed = 2f;
-            }else if (!Input.GetKeyDown(KeyCode.LeftControl))
+                animator.SetBool("isDiving", false);
+                animator.SetBool("isSwimUp", false);
+            }
+            foreach (char c in Input.inputString)
             {
-                ySpeed = 0f;
+                switch (c)
+                {
+                    case '-'://dive
+                        {
+                            ySpeed -= 100f;
+                            animator.SetBool("isDiving", true);
+                            break;
+                        }
+                    case '+'://Swim Up
+                        {
+                            ySpeed += 100f;
+                            animator.SetBool("isSwimUp", true);
+                            //animator.SetBool("isDiving", false);
+                            break;
+                        }
+                }
             }
         }
         if (characterController.isGrounded)
@@ -74,13 +94,13 @@ public class Movement : MonoBehaviour
             lastGroundTime = Time.time;
             animator.SetBool("isJumping", false);
             animator.SetBool("isFalling", false);
+            animator.SetBool("isDiving", false);
             isJumping = false;
             //ySpeed = -0.5f;
         }
-
         //if (Input.GetButtonDown("Jump"))
         //{
-         //   jumpButtonPressedTime = Time.time;
+        //   jumpButtonPressedTime = Time.time;
         //}
 
         if (Time.time - lastGroundTime <= jumpButtonGracePeriod) //Checks if grounded recently
@@ -111,10 +131,10 @@ public class Movement : MonoBehaviour
         Vector3 velocity = moveDirection * magnitude;
         //move the camera with character
         m_MainCamera.transform.position += (velocity * Time.deltaTime);
-        if (isSwimming != true)
-        {
+        //if (isSwimming != true)
+        //{
             velocity.y = ySpeed;
-        }
+        //}
 
         characterController.Move(velocity * Time.deltaTime);
 
@@ -154,7 +174,8 @@ public class Movement : MonoBehaviour
         //    m_MainCamera.transform.position += new Vector3(0, 1f * Time.deltaTime, 0);
         //}
         getInput();
-
+        if (isSwimming)
+            ySpeed = 0f;
     }
     void getInput()
     {
@@ -193,19 +214,30 @@ public class Movement : MonoBehaviour
                         animator.SetBool("isPose2", true);
                         break;
                     }
-                case 'g'://dancing
-                    {
-                        resetBools();
-                        animator.SetBool("isDancing", true);
-                        break;
-                    }
-                case 'h'://breathing
+                case 'g'://breathing
                     {
                         resetBools();
                         animator.SetBool("isBreathing", true);
                         break;
                     }
-
+                case 'h'://dancing
+                    {
+                        resetBools();
+                        animator.SetBool("isDancing", true);
+                        break;
+                    }
+                case 'j'://Flair
+                    {
+                        resetBools();
+                        animator.SetBool("isFlair", true);
+                        break;
+                    }
+                case 'k'://Shuffle
+                    {
+                        resetBools();
+                        animator.SetBool("isShuffle", true);
+                        break;
+                    }
             }
         }
 
@@ -216,5 +248,7 @@ public class Movement : MonoBehaviour
         animator.SetBool("isPose1", false);
         animator.SetBool("isPose2", false);
         animator.SetBool("isBreathing", false);
+        animator.SetBool("isFlair", false);
+        animator.SetBool("isShuffle", false);
     }
 }

@@ -42,8 +42,8 @@ public class Movement : MonoBehaviour
     void Update()
     {
 
-        float leftRight = -Input.GetAxis("Horizontal");
-        float upDown = -Input.GetAxis("Vertical");
+        float leftRight = Input.GetAxis("Horizontal");
+        float upDown = Input.GetAxis("Vertical");
         Vector3 moveDirection = new Vector3(leftRight, 0, upDown);
         float magnitude = Mathf.Clamp01(moveDirection.magnitude) * speed;
         moveDirection.Normalize();
@@ -238,6 +238,12 @@ public class Movement : MonoBehaviour
                         animator.SetBool("isShuffle", true);
                         break;
                     }
+                case 'l'://Range of Movement
+                    {
+                        resetBools();
+                        animator.SetBool("isStretching", true);
+                        break;
+                    }
             }
         }
 
@@ -250,5 +256,6 @@ public class Movement : MonoBehaviour
         animator.SetBool("isBreathing", false);
         animator.SetBool("isFlair", false);
         animator.SetBool("isShuffle", false);
+        animator.SetBool("isStretching", false);
     }
 }

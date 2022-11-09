@@ -23,15 +23,15 @@ public class Movement : MonoBehaviour
 
     [SerializeField]
     GameObject water;
-    //GameObject m_MainCamera;
     [SerializeField]
     CinemachineVirtualCamera m_MainCamera;
-    //Camera m_MainCamera;
-
+    void Awake()
+    {
+        Application.targetFrameRate = 60;
+    }
     // Start is called before the first frame update
     void Start()
     {
-        //m_MainCamera = Camera.main;
         animator = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
         originalStepOffset = characterController.stepOffset;
@@ -41,7 +41,6 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         float leftRight = Input.GetAxis("Horizontal");
         float upDown = Input.GetAxis("Vertical");
         Vector3 moveDirection = new Vector3(leftRight, 0, upDown);
@@ -52,7 +51,6 @@ public class Movement : MonoBehaviour
         if (transform.position.y + 1.1f < water.transform.position.y)
         {
             animator.SetBool("isSwimming", true);
-            //transform.position += (new Vector3(0, transform.position.y + 1.1f - water.transform.position.y, 0) * Time.deltaTime);
             isSwimming = true;
         }
         else
@@ -60,7 +58,6 @@ public class Movement : MonoBehaviour
             animator.SetBool("isSwimming", false);
             isSwimming = false;
         }
-        //if (false)
         if (isSwimming)
         {
             ySpeed = 0f;
@@ -75,15 +72,14 @@ public class Movement : MonoBehaviour
                 {
                     case '-'://dive
                         {
-                            ySpeed -= 100f;
+                            ySpeed -= 1000f * Time.deltaTime;
                             animator.SetBool("isDiving", true);
                             break;
                         }
                     case '+'://Swim Up
                         {
-                            ySpeed += 100f;
+                            ySpeed += 1000f * Time.deltaTime;
                             animator.SetBool("isSwimUp", true);
-                            //animator.SetBool("isDiving", false);
                             break;
                         }
                 }
@@ -96,12 +92,7 @@ public class Movement : MonoBehaviour
             animator.SetBool("isFalling", false);
             animator.SetBool("isDiving", false);
             isJumping = false;
-            //ySpeed = -0.5f;
         }
-        //if (Input.GetButtonDown("Jump"))
-        //{
-        //   jumpButtonPressedTime = Time.time;
-        //}
 
         if (Time.time - lastGroundTime <= jumpButtonGracePeriod) //Checks if grounded recently
         {
@@ -131,10 +122,8 @@ public class Movement : MonoBehaviour
         Vector3 velocity = moveDirection * magnitude;
         //move the camera with character
         m_MainCamera.transform.position += (velocity * Time.deltaTime);
-        //if (isSwimming != true)
-        //{
-            velocity.y = ySpeed;
-        //}
+
+        velocity.y = ySpeed;
 
         characterController.Move(velocity * Time.deltaTime);
 
@@ -150,11 +139,6 @@ public class Movement : MonoBehaviour
         {
             animator.SetBool("isMoving", false);
         }
-        //float deltaHeight = transform.position.y - m_MainCamera.transform.position.y + 1.5f;
-        //m_MainCamera.transform.position += new Vector3(0, deltaHeight * Time.deltaTime * 10f, 0);
-        
-    
-
         if (Input.mouseScrollDelta.y != 0f)
         {
             CinemachineComponentBase componentBase = m_MainCamera.GetCinemachineComponent(CinemachineCore.Stage.Body);
@@ -162,17 +146,7 @@ public class Movement : MonoBehaviour
             {
                 (componentBase as CinemachineFramingTransposer).m_CameraDistance = (componentBase as CinemachineFramingTransposer).m_CameraDistance + Input.mouseScrollDelta.y * Time.deltaTime * 100f; // your value
             }
-            //m_MainCamera.transform.position = Vector3.MoveTowards(m_MainCamera.transform.position, transform.position, Input.mouseScrollDelta.y * Time.deltaTime * 100f);
         }
-
-        //if (m_MainCamera.transform.position.y > transform.position.y + 1.5)
-        //{
-        //    m_MainCamera.transform.position += new Vector3(0,-1f * Time.deltaTime, 0);
-        //}
-        //if (m_MainCamera.transform.position.y < transform.position.y + 1.5)
-        //{
-        //    m_MainCamera.transform.position += new Vector3(0, 1f * Time.deltaTime, 0);
-        //}
         getInput();
         if (isSwimming)
             ySpeed = 0f;
@@ -185,12 +159,12 @@ public class Movement : MonoBehaviour
             {
                 case 'e'://rotate camera right
                     {
-                        m_MainCamera.transform.RotateAround(transform.position, Vector3.up, -7000 * Time.deltaTime);
+                        m_MainCamera.transform.RotateAround(transform.position, Vector3.up, -700 * Time.deltaTime);
                         break;
                     }
                 case 'q'://rotate camera left
                     {
-                        m_MainCamera.transform.RotateAround(transform.position, Vector3.up, 7000 * Time.deltaTime);
+                        m_MainCamera.transform.RotateAround(transform.position, Vector3.up, 700 * Time.deltaTime);
                         break;
                     }
                 case 'r'://rotate camera behind
@@ -244,7 +218,6 @@ public class Movement : MonoBehaviour
                         animator.SetBool("isShuffle", true);
                         break;
                     }
-
             }
         }
 
